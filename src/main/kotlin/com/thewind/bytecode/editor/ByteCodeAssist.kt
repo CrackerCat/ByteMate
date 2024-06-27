@@ -1,11 +1,16 @@
 package com.thewind.bytecode.editor
 
 import com.thewind.bytecode.model.PatchClass
+import com.thewind.bytecode.model.PatchMethodType
 import com.thewind.bytecode.model.PatchedClass
 import com.thewind.bytecode.model.entryName
 import javassist.ClassPool
+import javassist.CtClass
+import javassist.CtMethod
 import javassist.CtNewConstructor
+import java.io.BufferedReader
 import java.io.File
+import java.io.InputStreamReader
 import java.util.jar.JarOutputStream
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
@@ -20,6 +25,18 @@ object ByteCodeAssist {
     ): PatchedClass {
         ClassPool.getDefault().insertClassPath(jarPath)
         val classToModify = ClassPool.getDefault().getCtClass(className)
+        patchInterface(patchClass = patchClass, classToModify = classToModify)
+        patchConstructor(patchClass = patchClass, classToModify = classToModify)
+        patchMethod(patchClass = patchClass, classToModify = classToModify)
+        patchStaticCode(patchClass = patchClass, classToModify = classToModify)
+
+        val exportClassFolder = File(jarPath).parent + File.separator + "crack"
+        classToModify.writeFile(exportClassFolder)
+        val path = exportClassFolder + File.separator + className.replace(".", File.separator) + ".class"
+        return PatchedClass(className, path)
+    }
+
+    private fun patchConstructor(patchClass: PatchClass, classToModify: CtClass) {
         patchClass.patchConstructors.forEach { data ->
             val paramsTypes = data.parameterTypes.map {
                 ClassPool.getDefault().get(it)
@@ -37,14 +54,42 @@ object ByteCodeAssist {
             }
 
         }
+    }
+
+    private fun patchMethod(patchClass: PatchClass, classToModify: CtClass) {
         patchClass.patchMethods.forEach { data ->
-            val methodToModify = classToModify.getDeclaredMethod(data.name)
-            methodToModify.setBody(data.body)
+            when (data.type) {
+                PatchMethodType.REPLACE_BODY -> {
+                    val methodToModify = classToModify.getDeclaredMethod(data.name)
+                    methodToModify.setBody(data.body)
+                }
+
+                PatchMethodType.INSERT_TO_START -> {
+                    val methodToModify = classToModify.getDeclaredMethod(data.name)
+                    methodToModify.insertBefore(data.body)
+                }
+
+                PatchMethodType.ADD_METHOD -> {
+                    val newMethod = CtMethod.make(data.body, classToModify)
+                    classToModify.addMethod(newMethod)
+                }
+            }
+
         }
-        val exportClassFolder = File(jarPath).parent + File.separator + "crack"
-        classToModify.writeFile(exportClassFolder)
-        val path = exportClassFolder + File.separator + className.replace(".", File.separator) + ".class"
-        return PatchedClass(className, path)
+    }
+
+    private fun patchStaticCode(patchClass: PatchClass, classToModify: CtClass) {
+        patchClass.patchStaticCode?.body?.let {
+            val staticBlock = classToModify.makeClassInitializer()
+            staticBlock.setBody(it)
+        }
+
+    }
+
+    private fun patchInterface(patchClass: PatchClass, classToModify: CtClass) {
+        patchClass.patchInterface?.let {
+            classToModify.addInterface(ClassPool.getDefault().get(it.name))
+        }
     }
 
     fun packageClassToJar(originalJarPath: String, patchedList: List<PatchedClass>): String? {
@@ -85,4 +130,46 @@ object ByteCodeAssist {
     }
 
     fun makeClassName(className: String, innerClassName: String) = "$className\$$innerClassName"
+
+
+    fun compileNewClass(sourceDir: String, className: String): List<PatchedClass> {
+        val javaFilePath = sourceDir + File.separator + className.classNameToPath
+        val compileCommand =
+            "javac -target 17 -source 17 $javaFilePath -d $sourceDir"
+        val packageName = className.substring(0, className.replace(".java", "").lastIndexOf("."))
+        val outDirPath = sourceDir + File.separator + packageName.replace(".", File.separator)
+        val reader = BufferedReader(InputStreamReader(Runtime.getRuntime().exec(compileCommand).inputStream))
+
+        var line: String? = null
+
+        while (reader.readLine()?.also {
+                line = it
+            } != null) {
+            println(line)
+        }
+
+        reader.close()
+
+        val files = File(outDirPath).takeIf { it.exists() }?.listFiles()?.filter { it.absolutePath.endsWith(".class") }
+            ?: return emptyList()
+
+        return files.map {
+            PatchedClass(
+                className = packageName + it.name.replace(".class", ""),
+                classFilePath = it.absolutePath
+            )
+        }
+
+    }
+
 }
+
+
+private val String.classNameToPath: String
+    get() {
+        val dotIndex = replace(".java", "").lastIndexOf(".")
+        val packagePath = substring(0, dotIndex).replace(".", File.separator)
+        val fileName = substring(dotIndex + 1)
+        return packagePath + File.separator + fileName
+
+    }

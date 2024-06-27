@@ -16,7 +16,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.thewind.bytecode.core.FunctionPatcher
+import com.thewind.bytecode.core.patchIntellijLicenseDialog
 import com.thewind.bytecode.editor.ByteCodeAssist
+import com.thewind.bytecode.intellij.def.IdeaLicensePatcher
 import com.thewind.theme.LocalColors
 import javassist.ClassPool
 import kotlinx.coroutines.Dispatchers
@@ -41,7 +43,7 @@ fun ByteCodeModifyPage() {
                 color = LocalColors.current.AdobeMediumBlue,
                 modifier = Modifier.padding(15.dp).wrapContentSize().align(Alignment.Center).clickable {
                     scope.launch {
-                        patch()
+                        patchIntellijLicenseDialog()
                     }
                 }
             )
