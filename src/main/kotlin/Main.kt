@@ -24,7 +24,7 @@ import com.thewind.widget.TopAppBar
 import kotlinx.coroutines.launch
 
 fun main() = application {
-    val windowSize = remember { DpSize(380.dp, 700.dp) }
+    val windowSize = remember { DpSize(700.dp, 500.dp) }
     val windowState =
         rememberWindowState(size = windowSize, isMinimized = false, position = WindowPosition(Alignment.CenterEnd))
     val scope = rememberCoroutineScope()

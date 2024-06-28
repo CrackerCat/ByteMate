@@ -15,10 +15,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.thewind.bytecode.business.inteiilj.patcher.IntellijGeneralPatcher
 import com.thewind.bytecode.core.FunctionPatcher
-import com.thewind.bytecode.core.patchIntellijLicenseDialog
 import com.thewind.bytecode.editor.ByteCodeAssist
-import com.thewind.bytecode.intellij.def.IdeaLicensePatcher
 import com.thewind.theme.LocalColors
 import javassist.ClassPool
 import kotlinx.coroutines.Dispatchers
@@ -43,30 +42,10 @@ fun ByteCodeModifyPage() {
                 color = LocalColors.current.AdobeMediumBlue,
                 modifier = Modifier.padding(15.dp).wrapContentSize().align(Alignment.Center).clickable {
                     scope.launch {
-                        patchIntellijLicenseDialog()
+                       IntellijGeneralPatcher.patchLicenseDialog("/home/read/.local/share/JetBrains/Toolbox/apps/webstorm/")
                     }
                 }
             )
         }
     }
-}
-
-suspend fun patch() = withContext(Dispatchers.IO) {
-
-    val jarPath = "E:\\core.jar"
-    println("start generate class")
-    ClassPool.getDefault()
-        .insertClassPath("C:\\Users\\read\\AppData\\Local\\Programs\\IntelliJ IDEA Ultimate\\lib\\app-client.jar")
-    ClassPool.getDefault()
-        .insertClassPath("C:\\Users\\read\\AppData\\Local\\Programs\\IntelliJ IDEA Ultimate\\lib\\util-8.jar")
-    val patchedList = listOf(
-        FunctionPatcher.mockLoginStatus(jarPath),
-        FunctionPatcher.mockLoginStatusParser(jarPath),
-        FunctionPatcher.enableAllCopilotFeature(jarPath),
-        FunctionPatcher.mockLoginTypeParser(jarPath),
-        FunctionPatcher.mockAgentGitHubService(jarPath)
-    )
-    println("start pack to jar")
-    ByteCodeAssist.packageClassToJar(originalJarPath = jarPath, patchedList = patchedList)
-    println("end pack to jar")
 }

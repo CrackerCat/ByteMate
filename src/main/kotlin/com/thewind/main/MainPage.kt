@@ -21,6 +21,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.thewind.bytecode.business.inteiilj.page.IntellijPatchPage
 import com.thewind.bytecode.page.ByteCodeModifyPage
 import com.thewind.database.page.DatabaseParsePage
 import com.thewind.hacker.page.HexSearchPage
@@ -48,9 +49,7 @@ fun MainPage(
                 backgroundColor = LocalColors.current.AdobeDark,
                 indicator = {
                     Spacer(
-                        modifier = Modifier
-                            .tabIndicatorOffset(it[pagerState.currentPage])
-                            .height(3.dp)
+                        modifier = Modifier.tabIndicatorOffset(it[pagerState.currentPage]).height(3.dp)
                             .background(LocalColors.current.AdobeMediumBlue, RoundedCornerShape(3.dp))
                     )
                 },
@@ -63,8 +62,7 @@ fun MainPage(
                         fontSize = if (isSelected) 15.sp else 14.sp,
                         fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
                         textAlign = TextAlign.Center,
-                        modifier = Modifier
-                            .padding(vertical = 12.dp, horizontal = 5.dp)
+                        modifier = Modifier.padding(vertical = 12.dp, horizontal = 5.dp)
                             .clickable(indication = null, interactionSource = remember {
                                 MutableInteractionSource()
                             }) {
@@ -80,7 +78,8 @@ fun MainPage(
                     0 -> HexSearchPage()
                     1 -> StringSearchPage()
                     2 -> DatabaseParsePage()
-                    else -> ByteCodeModifyPage()
+                    3 -> ByteCodeModifyPage()
+                    else -> IntellijPatchPage()
                 }
             }
         }

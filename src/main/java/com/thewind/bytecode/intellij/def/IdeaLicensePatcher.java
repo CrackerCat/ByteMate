@@ -67,11 +67,18 @@ public class IdeaLicensePatcher {
             return;
         }
         try {
-            java.io.FileWriter writer = new java.io.FileWriter("/Users/read/Desktop/track.txt", true);
+            java.io.FileWriter writer = new java.io.FileWriter("/home/read/Desktop/track.txt", true);
             writer.write(log);
             writer.close();
         } catch (Exception e) {
 
+        }
+    }
+
+
+    public static void setTitle(String title) {
+        if (title.equals("Licenses")) {
+            return;
         }
     }
 }

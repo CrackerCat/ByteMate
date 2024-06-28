@@ -10,7 +10,7 @@ class MainPageViewModel {
 
     val noticeState = _noticeState.asStateFlow()
 
-    val tabs: List<String> = listOf("特征码搜索", "字符串搜索", "数据库解析", "字节码修改")
+    val tabs: List<String> = listOf("特征码搜索", "字符串搜索", "数据库解析", "字节码修改", "Intellij补丁")
 
     fun updateNotice(noticeContent: NoticeContent?) {
         _noticeState.value = noticeContent
