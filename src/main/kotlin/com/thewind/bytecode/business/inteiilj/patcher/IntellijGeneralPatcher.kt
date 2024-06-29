@@ -31,9 +31,19 @@ object IntellijGeneralPatcher {
             )
         )
         onEvent("正在应用补丁")
-        val success =
-            ByteCodeAssist.packageClassToJar(originalJarPath = jarPath, patchedList = listOf(patchedClass)) != null
-        onEvent(if (success) "破解完成" else "破解失败")
+        val tempCrackJarPath =
+            ByteCodeAssist.packageClassToJar(originalJarPath = jarPath, patchedList = listOf(patchedClass))
+        onEvent(if (tempCrackJarPath != null) "成功生成补丁文件!" else "破解失败")
+        tempCrackJarPath ?: return
+        onEvent("开始备份原文件")
+        val backUpState = File(jarPath).renameTo(File("$jarPath.bak"))
+        onEvent("备份原文件${if (backUpState) "成功" else "失败"}:${jarPath}.bak")
+        onEvent("开始替换原文件")
+        val replaceState = File(tempCrackJarPath).renameTo(File(jarPath))
+        onEvent("破解${if (replaceState) "成功！" else "失败， 请手动替换"}")
+
+
+
     }
 
     private fun findTargetFilePath(path: String, targetFileName: String): String {

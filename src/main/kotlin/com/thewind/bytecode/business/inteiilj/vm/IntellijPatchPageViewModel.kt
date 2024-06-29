@@ -30,16 +30,15 @@ class IntellijPatchPageViewModel : ViewModel() {
 
 
     suspend fun patchLicenseDialog() = withContext(Dispatchers.IO) {
-        val data = _pageState.value
-        if (data.isPatching) {
+        if (_pageState.value.isPatching) {
             updateNotice("正在处理中，请勿重复点击")
             return@withContext
         }
-        _pageState.value = data.copy(notices = listOf("输入地址"), isPatching = true)
-        IntellijGeneralPatcher.patchLicenseDialog(data.installPath) {
+        _pageState.value = _pageState.value.copy(notices = listOf("输入地址"), isPatching = true)
+        IntellijGeneralPatcher.patchLicenseDialog(_pageState.value.installPath) {
             updateNotice(it)
         }
-        _pageState.value = data.copy(isPatching = false)
+        _pageState.value = _pageState.value.copy(isPatching = false)
     }
 
 }
