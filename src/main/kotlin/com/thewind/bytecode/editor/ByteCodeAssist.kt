@@ -138,7 +138,7 @@ object ByteCodeAssist {
             "javac -target 17 -source 17 $javaFilePath -d $sourceDir"
         val packageName = className.substring(0, className.replace(".java", "").lastIndexOf("."))
         val outDirPath = sourceDir + File.separator + packageName.replace(".", File.separator)
-        val reader = BufferedReader(InputStreamReader(Runtime.getRuntime().exec(compileCommand).inputStream))
+        val reader = BufferedReader(InputStreamReader(Runtime.getRuntime().exec(arrayOf(compileCommand)).inputStream))
 
         var line: String? = null
 
