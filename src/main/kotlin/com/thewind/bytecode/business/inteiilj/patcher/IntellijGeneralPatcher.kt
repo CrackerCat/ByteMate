@@ -43,7 +43,6 @@ object IntellijGeneralPatcher {
         onEvent("破解${if (replaceState) "成功！" else "失败， 请手动替换"}")
 
 
-
     }
 
     private fun findTargetFilePath(path: String, targetFileName: String): String {
